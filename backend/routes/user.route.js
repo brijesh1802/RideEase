@@ -15,7 +15,7 @@ router.post('/register',[
 ], userController.registerUser)
 
 
-router.get('/login',[
+router.post('/login',[
 
     body('email').isEmail().withMessage('Invalid email'),
 

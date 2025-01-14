@@ -1,3 +1,4 @@
+
 const userModel = require('../models/user.model')
 const userService = require('../services/user.service')
 const { validationResult } = require('express-validator')
@@ -76,12 +77,18 @@ module.exports.getUserProfile = async (req, res) => {
 }
 
 module.exports.logoutUser = async (req, res) => {
-    const token  = req.cookies.token || req.headers.authorization.split(' ')[1] 
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1]
 
-    await blackList.create({token})
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized: No token provided' })
+    }
 
-    res.clearCookie('token')
-
-    res.status(200)
-       .json({message: 'Logged out successfully'})
-}   
+    try {
+        await blackList.create({ token })
+        res.clearCookie('token')
+        res.status(200).json({ message: 'Logged out successfully' })
+    } catch (err) {
+        console.error('Token verification failed:', err)
+        return res.status(401).json({ message: 'Unauthorized: Invalid token' })
+    }
+}
